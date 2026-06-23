@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>WingtraRAY Operator — Day 1 Knowledge Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root{
+    --mercury:#1C2E36; --mercury-deep:#16242B; --panel:#22343D; --panel-2:#273B45;
+    --line:#344A53; --orange:#F46F29; --orange-soft:#f4885033;
+    --uranus:#A3BABD; --canvas:#EDF2F2; --white:#FFFFFF;
+    --green:#46B07E; --green-soft:#46b07e22; --red:#E5614F; --red-soft:#e5614f22;
+    --r:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'Manrope',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    background:radial-gradient(120% 100% at 80% -10%, #21353F 0%, var(--mercury) 45%, var(--mercury-deep) 100%);
+    color:var(--canvas); min-height:100vh; min-height:100dvh;
+    display:flex; justify-content:center; align-items:flex-start;
+    padding:max(18px, env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));
+    line-height:1.5;
+  }
+  .app{width:100%; max-width:560px; margin-top:4vh}
+  .eyebrow{font-size:12px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--uranus); margin:0 0 10px}
+  h1{font-weight:800; font-size:clamp(26px,7vw,34px); line-height:1.1; color:var(--white); margin:0 0 12px; letter-spacing:-.01em}
+  .lede{color:var(--uranus); font-size:15.5px; margin:0 0 26px}
+  .brandmark{height:30px; width:auto; display:block; margin-bottom:26px}
+
+  /* screens */
+  .screen{display:none; animation:fade .35s ease both}
+  .screen.active{display:block}
+  @keyframes fade{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+  @media (prefers-reduced-motion:reduce){.screen{animation:none}}
+
+  /* inputs / buttons */
+  label.field{display:block; font-size:12.5px; font-weight:600; letter-spacing:.04em; color:var(--uranus); text-transform:uppercase; margin:0 0 8px}
+  input[type=text]{
+    width:100%; padding:15px 16px; font-size:16px; font-family:inherit; color:var(--white);
+    background:var(--panel); border:1.5px solid var(--line); border-radius:13px; outline:none; transition:border-color .15s, box-shadow .15s;
+  }
+  input[type=text]::placeholder{color:#6f868c}
+  input[type=text]:focus{border-color:var(--orange); box-shadow:0 0 0 4px var(--orange-soft)}
+  .btn{
+    appearance:none; border:none; cursor:pointer; font-family:inherit; font-weight:700; font-size:16.5px;
+    width:100%; padding:16px 20px; border-radius:13px; transition:transform .08s ease, filter .15s, background .15s, opacity .15s; margin-top:18px;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:var(--orange); color:#1a1006}
+  .btn-primary:hover{filter:brightness(1.06)}
+  .btn-primary:disabled{opacity:.4; cursor:not-allowed; filter:none}
+  .btn-ghost{background:transparent; color:var(--uranus); border:1.5px solid var(--line); font-weight:600; font-size:15px}
+  .btn-ghost:hover{color:var(--white); border-color:var(--uranus)}
+  .btn-row{display:flex; gap:12px}
+  .btn-row .btn{margin-top:0}
+
+  .hint{font-size:13px; color:#7d949a; margin:14px 0 0; text-align:center}
+  .linkish{background:none;border:none;color:var(--uranus);font-family:inherit;font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:8px 0;display:inline-flex;align-items:center;gap:7px}
+  .linkish:hover{color:var(--white)}
+
+  /* progress */
+  .topbar{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px}
+  .qcount{font-size:12.5px; font-weight:600; letter-spacing:.05em; color:var(--uranus)}
+  .qcount b{color:var(--white)}
+  .rail{height:6px; background:var(--panel); border-radius:99px; overflow:hidden; margin-bottom:26px}
+  .rail > i{display:block; height:100%; width:0; background:var(--orange); border-radius:99px; transition:width .4s cubic-bezier(.4,0,.2,1)}
+
+  .qtext{font-size:clamp(19px,5vw,23px); font-weight:700; color:var(--white); line-height:1.32; margin:0 0 22px; letter-spacing:-.01em}
+
+  .options{display:flex; flex-direction:column; gap:11px}
+  .opt{
+    display:flex; align-items:center; gap:14px; text-align:left; width:100%;
+    background:var(--panel); border:1.5px solid var(--line); border-radius:13px; padding:15px 16px;
+    color:var(--canvas); font-family:inherit; font-size:16px; cursor:pointer; transition:border-color .15s, background .15s; line-height:1.35;
+  }
+  .opt:hover{border-color:#4a626b}
+  .opt .key{flex:0 0 28px; height:28px; border-radius:8px; background:var(--mercury-deep); border:1px solid var(--line); display:grid; place-items:center; font-weight:700; font-size:14px; color:var(--uranus); transition:all .15s}
+  .opt.sel{border-color:var(--orange); background:#2a3b3f}
+  .opt.sel .key{background:var(--orange); color:#1a1006; border-color:var(--orange)}
+
+  /* results */
+  .scorecard{background:var(--panel); border:1.5px solid var(--line); border-radius:var(--r); padding:24px; text-align:center; margin-bottom:8px}
+  .scorecard .big{font-size:54px; font-weight:800; color:var(--white); line-height:1; letter-spacing:-.02em}
+  .scorecard .big span{color:var(--uranus); font-size:30px; font-weight:700}
+  .scorecard .pct{font-size:15px; color:var(--orange); font-weight:700; margin-top:8px; letter-spacing:.02em}
+  .scorecard .verdict{font-size:15.5px; color:var(--canvas); margin-top:12px}
+  .scorecard .who{font-size:13px; color:var(--uranus); margin-top:4px}
+
+  .sec-h{font-size:12px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--uranus); margin:26px 0 12px}
+
+  .send-card{background:var(--panel-2); border:1.5px solid var(--line); border-radius:var(--r); padding:18px}
+  .send-card p{margin:0 0 14px; font-size:14px; color:var(--uranus)}
+  .send-grid{display:flex; flex-direction:column; gap:10px}
+
+  .review{display:flex; flex-direction:column; gap:12px; margin-top:4px}
+  .rev{border:1px solid var(--line); border-left:4px solid var(--line); border-radius:12px; padding:14px 15px; background:var(--panel)}
+  .rev.ok{border-left-color:var(--green)}
+  .rev.no{border-left-color:var(--red)}
+  .rev .reb{font-size:11px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--uranus); display:flex; justify-content:space-between; align-items:center; margin-bottom:7px}
+  .tag{font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; letter-spacing:.04em}
+  .tag.ok{background:var(--green-soft); color:var(--green)}
+  .tag.no{background:var(--red-soft); color:var(--red)}
+  .rev .rq{font-size:15px; font-weight:700; color:var(--white); margin:0 0 9px; line-height:1.35}
+  .rev .ans{font-size:13.5px; margin:3px 0; display:flex; gap:8px}
+  .rev .ans .mk{flex:0 0 auto; font-weight:700}
+  .rev .ans.you-wrong{color:var(--red)}
+  .rev .ans.correct{color:var(--green)}
+  .rev .guide{font-size:13.5px; color:var(--uranus); margin:10px 0 0; padding-top:10px; border-top:1px dashed var(--line); line-height:1.5}
+  .toggle-all{margin:16px 0 0}
+
+  /* QR overlay */
+  .overlay{position:fixed; inset:0; background:rgba(8,15,18,.92); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; padding:24px; z-index:50}
+  .overlay.active{display:flex; animation:fade .25s ease both}
+  .qr-card{background:var(--canvas); border-radius:20px; padding:26px; text-align:center; max-width:380px; width:100%}
+  .qr-card h2{margin:0 0 6px; color:var(--mercury); font-size:20px; font-weight:800}
+  .qr-card p{margin:0 0 18px; color:#5a6b70; font-size:13.5px}
+  #qrbox{display:grid; place-items:center; padding:14px; background:#fff; border-radius:14px; margin:0 auto 16px; width:max-content}
+  #qrbox img, #qrbox canvas{display:block}
+  .qr-url{font-size:12.5px; color:#39535b; word-break:break-all; background:#dfe8e8; padding:9px 12px; border-radius:9px; margin-bottom:16px; font-weight:600}
+  .qr-card .btn-primary{margin-top:0}
+  .foot{font-size:11.5px; color:#5f767c; text-align:center; margin-top:28px; letter-spacing:.02em}
+  .timer{font-size:13.5px; font-weight:700; letter-spacing:.03em; color:var(--uranus); font-variant-numeric:tabular-nums}
+  .timer.warn{color:var(--orange)}
+  .timer.crit{color:var(--red)}
+  .qsec{margin-bottom:10px}
+  .timeup{background:var(--orange-soft); border:1px solid var(--orange); color:var(--orange); font-weight:700; font-size:13.5px; border-radius:12px; padding:11px 14px; margin-bottom:14px; text-align:center}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ───────────── START ───────────── -->
+  <section id="start" class="screen active">
+    <img class="brandmark" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAY8AAABdCAYAAABdG+p3AAA31UlEQVR4nO2dd3Qc1fXH73vTtmlXvVmWJXdbzb2DMQ4BGxxKCMXG9JqEkkDyC5BCCGCKDSRUQwKEEFoIHYwbNsa9GxfJkizbsq1et+/MvPd+fwgTIWt3Z7aomPmc43NA+8pdaXfuK/d+L4I+BoeAM2OwDknghg2zotF5Vjx0gAXnpksoM0VEqRYe2SwcWBAAYgDMT8DnIczTKrOmBj+rO+6j1Yc9tKLcRUsPe1m5R2VuwoD09vsyMDAwOJ1AvW0ABsBJIqSOT+KmzEjlz56QzE0dkYALrTy2RDu2V6Xegy56YFsL2bC+SV2zo5VsapWhiQLQWNhuYGBg8EOl15xHughZszP4ORdkCZdOSOamOUTsiPec7TJt39FKNn9ao7y3uoEsawiwGgbA4j2vgYGBwelGjzoPAYMwLpGbunCQcPPsDH5OkoiTe3L+zrTJtHVto7ryzaPK3zc1k3UKg0Bv2WJgYGDQ3+gR5yEikM7L4i+8MV+8c2wSN0nAiO+JebVAKCP7nGTPK1Xysx/VqO/4KXh72yYDAwODvk5cnQeHgDs3g7vwruHS/QV2bgyHEY7nfNFAGWNVblr+VHngoY9r1XcUCkpv22RgYGDQV4mb8yiw47EPFkpPTknmz+zLTqMrlDG2u41s+/N+/2+2tNB1vW2PgYGBQV8k5s7DxoH91yOkP96YL94hckiIdjyVMlWmTHap4GwKsAanwto8hHkYA4oQIAuHrAk8cqRJKD1BAIeIkcQj4BBCUb03hTL13WPyaw8fCNzXokBjtO/DwMDA4HQiZs4DAaCJSXj6EyWml0bY+VGRjEEZY26FOfc76Z5tLeqmfe10Z4WbltX42TGnwtpCRUYhAGThICHbjHKG2riRhQ48ZmISN60okRtr51FipLufag85+rtv/D9f00iWGZFZBgYGBh3ExHkICKRbBot3/XqE9EcLj3TlZ1DGWK2PnljTQJYtr1M+2d5KNrYq0BwLuwAA7AJyjHHgyedk8heck8Gfn2vB+VjnrkQmTFlaFXhyyUH5AT8Ff6xsMzAwiA4EgEwYLD4KPjDyt3qUqJ1HogApjxWbnp+XLfxMz0PZT1hgfZP65ZvVyj/WNagr3QSc0doSDhMGy7RU7qz5ueL1s9K586w8turpv6ZeWXHXbt919QGoiZeNBgYG30dEYHIIkJgsotRsM84ZaMH5Ay0ob5AV5w8w4Vy7AI4L13tntijQ0Nu2/pCIynkMNKP8lyeY3x2TxE/Q2serMu8nNcp7S6vkp8qc9JveyPZGAGiwFY24IV+8/dKBwgK7oD1BscJFym7a7ruszEX3xtNGA4MfIkOsaOTEZG5argXn51pw/kALzss0oQEOATmsPEroLszfq1LvpFXuIU0y1PWGzT9UInYeI2yo8PXJlo8HWbl8Le1VysiyWuXDJeXynw+66L6+cH+AAFCuBQ25c5h036U5/AKRw6KWfnU+Wnvzdu9lW1vp+njbaGDwQ+JPo6Ultw2Vfq2nj+E8eoeILpELEtCYd6dZV2p1HOUuUnbVFu/5t+70X17monv7guMAAGAA7KiXVd69x3/DRRu8M3e3qju09Ms046zXJlk+mpbMzYq3jQYGBgZ9Ed3OY3QCLnlrqnVZhglnhmurUKY8XxlYcu5XnglrG8nyvqpuywDYzja6ed4G79RFpf4/+FUa9lI8WcLJr0wyvz8lmZvZEzYaGBgY9CV0OY88Cxr62mTLh+kaHEedj9Ys3OL9yYMHAvf4KHgiN7HnUCgof62QH/rpRu/ZlS5SHq59oogT/zHR/F6hHY/rCfsMDAwM+gqanUeKCOkvTzT/J9eC88K13d6ibr5gvWf62kbyRVTW9RI72uimizd4Z66qV5ZRxkIesaVIOPUfE83/zTbh3J6yz8DAwKC30eQ8RASmJSXml4oc/JhQ7Shj7NMTyvvzN3vnHPexI7EwsLdolFndjdt8l75xVHmJUBYyImyQlctbOsH0thmDrtBfAwMDg/5KWOeBANAdw8Tf/TiT/0modpQx9na18uovd/kWOlVoi5mFvYifgve+ff7bnz+kPBHOgUxM5qc+UGBagvpAgS0DAwODeBPWeZyRyv3o9mHSvaESAClj7K1q5ZXffeP/+ekmaa5SUB4t89//bGXgcRbmCGvBIOGGiwbw83vKNgMDA4PeImRdDQcPyYtLTC9JHAqZ/4ARQudl8hfOTrfN1TqxiQOT1rYuhTnL3fTAmgZ1+QcnlLea5Z7NJCUMyGMH5d/bBeS4Ll+6LVg7HiP+wULTk9tbPBuP+djhnrTRwMDAoCcJ6Tz+WGB6ItfK5WkZKEXCqTGxqBsSRUgaaOUGzc4Q5vxmhPTnpyoCD/29SnlaZaDGa86uUAbkD/sDd2WbcM65WcK8YO3SJJz+UKHpr9dv913cV0OTDXoWDIARAoRYx5EmQ8AYA9Yb6gpaQAAIAaDONgP8z24GHf9600aD4PTU3y+o85iWwp11+UDh6mgniDUOETseKDA/MSGJm3L7Lv81PtJzYcAqBfmOXb5rP7DgtaMdXFGwdj/K4M+fl81f9uEJ9S0943/7R+d0G4aA0X7gqHDHMane3CLa9SGLwyx6tI5zEg4Bx5j2uyoGQIJ9+RAAcgiQPD6JmzIhmZs6wsYVZJvRwCQRJZs4ZGYMmI8wT5vCWk/42LFyF9m/o5Vs2d5CNjlVaO3ph7IJgSndjLML7WjsSDtXkGfBQzNNKDtZQqlWDtnMHLIgBIgxoD7CfF7C3G0ya2tWWMNxLzta5SYVB130wCE3Pegi0NZbRdQ4BFwkn4vu/pYRfA+DfrZOwmMQk3hIHmzDw3PMeJBDQIkSBxJjAB4CruYAbaxw07ITflbtU8ET7nMgYBAsHLJlSmjAEBsakWvF+TlmnJshoewUCaXZBeSwcshq4pAFI8CMAfNT5nOrzNUqs+Y6Hztx2EMrDzjJN9+0s50NMq1TKcg63nP3v2wRgelPBdISvg+Vi+3KBdniT30EvHfu8l9Poed2IH4CvioPqQjlPDiM8G9HSA+uqVeXt6vQonXsXAsavHS8+R2M9F26lznpvjt2+6/R06c3uC5fuF3vguSfR5QX/12tvHzy/1NFyPj3FMtnegMTXj+iLn2jWn6pu9f+UiD9bUIyN0XLOIQBuXOX77pyN9vf+ec8AmFKCnfm1XnCLTNT+XMcIk4MN9bYJJgIIFwCANAu0/Y1Deryfx2Vl25poV+rLH4PYRsH9ump3NlzsoSLJidzZ+RacF60Bdt8KvUd8tDyna1ky9eNZPXmZnVdY8fxctx3VxJGpremWJZF8jt7YL//7o3NdG3nn01L4c7+U4H0uNYxPqtV3/9rhfxw15/zCIRCBx57YbZw+cw0/kdDbWhkKAkkyhhr8LO67a3qpj/sC9xV62fHOo81MgEXTk7hzhiXyE0eaceFuRacnyDgBK12BkOhTK1w09KvGtSVH51Q3tnvoru0LAK6dQ4/yxEWFjm4MdEaFW8uGSAsWNugrvjvCfWNnphPRCA9XmJ68YJs8ZJwbQfbuKHX5Ys/f7pCfkjr+PV+VmsXkGOwjRuqx65cC803YTD7O2SpdcFjEDkdqyzKgCoMAnrnAQD4cQZ/QXEirzmhUqWMVLr9Bzv/TMBIKHJw4/TK6qeb1KCJrflWPFSPXcMSuFHlbvU75zHGgSfeO0p65Iw0frZeu07iELHjohzxsnnZwk/XNqor/nLA/39lLhZT8c0MCQ24Ok+45bKBwjUDLVxM85LMPDYXOnBJoYMvuToPbnYp1LW9lWz6tEZ9b1W9+nl9gJ2I5Xyd4TDCox180MVcMFTKSLsC7V1/7hBQop7PQ1OANSAAdHK3gAHw1BR81q+GS7+fksKfyWOk6fuFEUKZZpQ1WxDm/BkF7un82vQUbtZbUy1fRPr5CoWAET/azhWNtnNFNw0W79zeQja9cEhevLpe/UwNsTA/xXlYOUj4xTDxtxj1/dKxHEb4jmHSvZ/Xqh/EO4tdQCAtHmN6+bKB4kKtfW7IF29/s1p5pSHANEm4+yl4v25Sv9TrPGw8Shhqw6P2OelOPf0AABYXm5ZOS+HO0tr+sIdWLtzqO1/WucW1cmAfkcAV6OlTH6C1e9rodj19eoIhVjwcoMPx3jZYuPuu4ab7rTyKSY4PhxE3O0OYMz6Jm/LHff5f/ee4+nq0R1kiAvO1+cKtvxwq/V+6CWfEws5wJAg4YVY6/vGsdOHHrTJtWVWvfv76EfnFHW10c185YvWozNUYoFGLKeZacD4HwKkAql1AjvtHio9ekSteHy7QKBgNAVrXFGDfCwoaYccF8XAcXeEx4qak8jMmJnPTvmpUV/x+n/+uKg872F3bUxzEpTnCVXlWPCTeRsaKYQl41IRkfmo85xARSEtK9DkOAIA0E06/dpBwq54+q+rVT/VZ1xHlVezQL5HCYxDPzeR/kmvl8rT+m5LCn5kuoWy9c+VZ8eAUCekKqljfSL7si6HfQ2x4uJkD61Mlpn/8bqTpoVg5js4kijhpcYn55RvyhTuiGSfHhAa9OdX8+QMFpiU95Ti6kiTi5J8NFK/67zTrl29ONi/7Vg+u2wchRpGJtUZCs8ya2mRojXacLDPOEXkwpZkg841J5s+vyZdujdRxAAAc8dDKrovh4TY8Olo79cBhhM/OEM77eIb16/MyuYu7a/O9P5QJg+W6fPGXPeHhYgVGCM1IxWfHa3wBgbRkjOnlSwcKV0XS/6o88eZEASVpbb+9lWxuDtAmvfOMSeI011Q5SZEdj00ScbKePhKHxCkp3Bm653Jw4wSsvaY9ZYytqlc/0ztPTzDKjoufHmN65dIcYUG0dwWhEDkk/KnAtPj8LP7SSPoX2fG4j2ZYvp6RKpzVF77TIofEs9KFc96dZlk5NhFP6q6NgCHih65eanz0mMyirwxq5ZG1IAGPeWeyZcWkFH5atOOVOum+zv+PAfDwBK5HncdJUiWc9sI4878vy+Gv7fra9z74s9L5c4cn4Ijqj/cmg23csHiMKyKQnhxj+vvPBooLI/3ypZtwxk+y+Su0tm+ToWlbC9mkd55xSdoufDszM40/R28fAIAzU/kf6e0zPgnrss+rMs/GZnWt3nl6gkIHN+bCAeJlqAceyAJG/OIS09Icndppo+14zFtTLV8MsHAD42VbpIgYCRLWnucVL6rcLKz4qVZem2T5IJJ7l+7Y7yR7Ov8/xsAPtuG4POO0YOax+bFi8wuz07jzv2fXd/+BgFs4SLilL6xQ9BKPD6KEwfzkGNM/fjZQjGjH0Zmr84RbsMYQVQbAVtUruo+uci04P1mEdD19zkzT7wQAACYlczNEHStEDgE3JlHfzmhnG9na08mgWunp70iSiJPvGy0+prV9hoQGvDLR/N9UCafF067+ziFPeOVsrcQqz41QRkqd369SmipCepKAUmIxfqSYeWRaMsb8crblf4uY7x5ouWY0OJLjiNMREwbLkhLTS5cOFBfEYrzRdq64OBFrfnhuaCJrvCrTddZv5ZBthE371tYhoKSiCO5JAAAGWnBerhlpvhdLESFjkAUP1jPHyjr1E/2Wnb6cnyVcPDIBh13Z8giER4pNz+RZOV2/774CjyLK4YmISjft9iK4N2lXWFuNjx7r/LOhVm5EPI9HtZJpxln3jxAXnVwIf2fQ3CzhYguPLb1nWt/AhMG0uMNxRL3jOAlGCF08QLhSa/tqH6sqc5J94Vv+Dw4jXJyo3RmMTcSTrRyy6Zmj81zTUrVHaA234ZF2UXudeJUy8mWDuiwS205XJA5Jlw8UwubynJ/F//TcjNAipn0ZEUd+0awHmTD5uI8d7Ym59FDrZye65oYN60NXCfOyhUsLv1108gAdq5W5WfxFvWpVH0DEID5aJL0Qqx1HZ+Zm8pc8eCBwjxbJEsKArG5Ql41L5ru9VAzG2CR+EmjMk5qRys/COPLjlzNT+dmvH1Vf0GjXZD1jH/bQiipv7M6jexKPSj01Pna8RWbNHpW5rByypkgofYAZDTTz2BzN2D/O4OctKgvcFyxM2sKD7VfDpd9rzSvoDsoYq/XRE/uddHeFi5a1yrRZZaBYeGRNl1BWvhUPHWzDw7NMOLsvJRFTGlq0tCsulTkb/NGH6caag06yv+szort7aEIZdaqsvTHA6uv8tKbex040yayhXWHtMmUBhYJi5pA5QQB7lgnnDLbi4Xk2PCRRQEnRHLuKHBKvyRNuvXtP4EYeACDLhHIKHdwPuhoej0F8rMi09IpB4rXxGD/bjHMK7Xjcnna6TUv7NQ3qF3cNZ/fpiVAqtOOxAgYhXHYoAkBnRHjfcZKpqfxMHoAPlUR0knFJnC4nuKpe+Zyx/qWdVOpU9y09pDy9rpGsbArQerlTIqWIwJRpxtkXZPGX3jpEvDvdhHXdTZ0kx4IHDbKgoRVudqC71+dk8hcPT4g8pHNrs7rxbxWBRZtbyDq3Cs5g7Sw82HLNKO/sdH7uFbnitcMTuF5dGfsJ9V+1xT+vVdYepahQUNoUaI6nXf+bi6lVblpR5SHlDQFW51XBgxHgBB7sWWacM8SKh+VYcB5GCJW66CmJoUNteES1hxw56KYH9reT3Qec9JsKFy2t99NalwpOLUm7GAAniZA6PombcvlA8dpzMvgLRE77s6UzczKFi/64L/ArHgBgago308QhKZKBTgd4DOLiYtPSK3Lj4zgAOo56Zqbx5+xplzU5j31OurvWR09oFaYEAMgyowEZEhoQrhBXlgkPHGpDI7SO2x0pEk4d7cBjvmkPncRnwmAZZcfFesbub/cd/zwsL31gv//uYImqMgN/tZdWPX9IfnxZrfLB65MtnwxL4HT//iUOSaPsXFGFWz3FefAA/MJBwk2RrCoJZeS5ysATT5bLf/bT8KGrXhXcZS62r8yl7Kv3s9rnxlte1ztnLKEMaJlT3dckQ5/aSTQFaOOrh+Xn3juu/LvWz6qD7BiRCYMpz4qG/jhDmLehSV3TtcEvdvoXOhXWHqDgizRhlALQZhkaVtSTj1fV+z6dmMzNeGqM6R96E5IBAJIlnDIuiZ+MAQDOSOPjlifR1xEQSIuLTS9pOU+Olulp3CytbWUK/nWN6io941t5bB2ZgMNmcU9I5iZbOBT1/daM1PDvJ8OEsnLMeJDWMZsCtHFHG90SnWU9x+c18oe/3++/XavCwWEvq7hzl+9an8oiyi8Y/G12e1fyrGjY+ERed7g2AMDLVfLfFpXJ92lxHF1hfVQZuLdZXa988aO17rFLyuU/H/WyyhCKDMxPwVfmYnv/Vik/srONbu7aoCHAav0UvLESzaQAdEsLWXfxBu/MI25yKJIxJiXj6VhAIIxL4nSdSZ8umBCYFpeYll6RK17TEzH7RXZurElHqdrl9eon4Wqod2Wshr/l9BQ8Oxbv94xUfnZYexK5SXrO4L9uJKsDEWh09QYuhbn+ciDwG71Ksrva6JavGtUVkcyZaeo+u392Bj9XiOAY4qCTHHi0LPB7Q2I9dqyoUz69fpvvkroAxE3PKxbUB1jNHbt916qU6ZaLGWnninCihFJyLShkWB9ljMXqX+RvNbZIGMyPlphevKwHZecTBOQYasOajyu2tdCvnQpr0zPHmERuQijFWR6An5bKz9QzZjDGJ3NTw9VtH68zeXFVvdIns8q7Y22jsuKIl+leuTEAtqxO+SiSORN4ZO/6MwSApqfymne1nXmuMvBEX5SA6a/U+WjNPXt8t/SXBdD2FroxkoXMIAvK50faUKGAcdCoiVcOB55fXqtG9EHvCkKAihzcuJsHi3elRXhpGAskDObHik0vXJEr9qiMuYARP8qOC7UKGLYprHVbC9l0TibWXKFxuA2PNmOweim4u3s9z4aGDbSgPK3jhcLKIdu4JDx5QzP9srvXOQRccSI3Xut4PpX69B7V9SYr69RPI12x72unuxTKVEFnxFJ32k8CAqnIgcfotcGtUPendep7evsZBGdpVeCphgBoEkLtC1AA+nGN8p/ZGcIcPf1SRJTOD7MFj5SgjLHPa9X31zeR1dGb2cHaRrJ8Zb3y6YfTrV8liliz5lOsEBFIjxebXrw8V+yVQlfDdEbDrKxXPjknU9DsPDJMODvLjHIOeVhZd69PSuanmzgck4z8jnwP/qwNzXK3zsPKIZuWO5iT7GojW1sUaIyFbfGGUEb2tNMdkfZvDNA6r8o8DhFpzn8JRrKIUtIkHFRyPhjbW8lmr9r9IsNAPx6Vet4/rr7Z23boZUcL2Uwoo3oSEW08SsD5Vhz0tp0wIJUu2u1DKBrKXGzvK4flZ2M9bjgEBMKiYum53nIcAAB5Fn2Kxasb1GUqZZqLXYkcEooc3Nhgr89I5cLeUwAAtCv0lDoH3Y8XPNhisBWN0FIU6SRfNqjL+kvp3naFtTUFaH2k/b0EPAEaWV2UruRaUH4kuR372umuWMxv0EGpk+6t11h+oS/RKEOdhzCXnj4CBoEfYAkuuOZRmbtRZnEJf9vSQtbHY9xgCBiERYXSC1fmitf35LxdyTHrE7g74YOjB5zkGz3FacYlcZM+rDm1BK6FB9t4DRfqjX7S8HGN+u4Ng6Vfhms7yo6LUkRI706HarzG6nwAHSv5L+vVL7S27228hHk8UazaaUfp0pg4ykwTGhBJv6NeUhWL+Q062NVGNIXhxwIEgFJFyCxwcMUjE3BhnhUPzTThbIeAEi0cWBEAUgGIVwV3k0wbTnjpsXIXPbC3news97DSziVnFcIUt8JcdgF07YL5DAkF3e7W+unxeK0E9RYTigYegfBoUYfj6G3hx2QRpQoIBEVHycyV9epnepxHiYObgBFwXYvuDLbgYQM0OK9tLXTDsjrlw+vyxV+E+33ZeJQwNpGbtKqBnCLmOCGJ01xnpcpDKyqDFJ3piwQIBCKtqBhrUiIUQGyR+8cRYX/hiIdWxHuOFBEyLh8oXD0vW7hsZAJXIHFg0vNMUylT6/209vNa9cNXDsvPHvaycgbAqM67OwpAcWIItcYGf3x2HT2JgEB6vFh6ccEg6YaecBwHneTA+sZTE31OYuGRVeBAV0Km3gJRQxLwCHs3UTkzUrmztRxvfNWkrtraQje4FBY0y/gkGCHUnTovBsBjErmJWm1e26iulCPIM+gtGADrK1nwNh5FVMc6QFifcH6nCw2B+CUp2jiw3ztSfGTLbFvlHwvMj49N4ieYeWTW+0zjMeIHWLiBNw2Rbl83y7b/LwXS3xKEU58V4QgQCOAEAYJ2bFdZ1FW2ehMRgenRYtPz8wdJPXJUVeZU91+52TcnlKihgEEwIdClcbS3ne464aXHtbZPFlBqVxVbhACFup84iUKZurFJXStT8G9sIkGdYGempnAzOfT9OuipEsocaMF5WvpTxtjqPlr4qT9g4vR9nk4SSc17g+B4VBqX4IPRCbjk0zMsm+4cbrrXJuCIxEy7Q+AQf9MQ6fZ3p5pXRrIAwSYOBf3gedX+G/8tYTAvKjY9t2BQz9xxHHSqB+Zv9s2p8dNqL0FBf288Al5vtTSVgfJlg6JZZRZjhIod35eAt3OQpCVs9oiHVlZ72GEAgDWN6nIt8+Xb8NAsE/pe0aESB56g9RK3KcAadreRPlervL8QqYx5X9k5nS5QFvts+7GJePJ/pllWjbTzcaskONLOFyTqCGw5CQ71weuvWaciAtOiIunZK3OF63pivjIn2b9gs39OjZ8dAwBQGQ0rTKh3jlX1RNfKfGwS/t7F+Eg7LkiVUNjcmi3NZH2AdaxI1zWqqwllYb8QNh7buqoU6BFD3N5CNvWUSJ2BQX8h24RzX55gfjdWhaZiDSYhvGUkD7nehgfgHymSnrkyV7yuJ+44StvJvqu2eM4/7qfV39mAcERqlaHY0qKub5e1hc8CABQ7uHE8hu/sOCOVn63l97GuiXyXbXrMx6qqNF4Cdi1NOz6Z13xZvqK+fwkhni7oqQZp0LNgBNyDheJTORZOV3RmT4L9JPjRlIWHflUcCgPwDxdLz16VJ93YE1pVpU6yb+FW77zjPvheURmJY0GT8AgDIkcQpdOuQsu2VrJBa/vBNjw8gesIvcMIuOkaRAzdCnXtbCHfiRISBmRdo7pSy3yTUrgZIuoIBOAxiMUaqxS6FerZ1Kx+paWtQWzherBqn4E+piVzZ52bKczrbTtCgd1q8IiaBE7/LXxvwQPwjxZJzy0cJN7cE/OVOcmBhZt953cnf95dpNNJFApKgESgXsqArajTHnVl4bF5VAJXCADg4CG52BH+vqPcTUtrA/R7Ym5rGrTdewyyoPyBFpQPADDCikd1p8HUHQdddN8xb8cdi0Fk+EIsAENh4ZFmkc5g4C6BEgbRgwDQzUPEu/TU8ukOv8oCTQHa2PjtvzaZtkUighgMvlVmLflBXkw1oYxYTRRPBAziomLpuasGiTf1xI6jwkXKFm7xnn/cz6q7ez0txO/NS5hHZpGFpH7VoK7wExbQWntlTBI3aWMLWTs+iZtsFXDYB8X6RvJl17ye7a1ko1OhTruAQzoDicPS5BRuxiGPWjYmCU/SKnWwul79nBqy3lHhJyyiqKlkEUV9lq51kWCgnTwLGjo9RXv5hpNQxtieNrLj30fll9c1ktW1AVZNaKfvMwIkIpCG2PDw6SncrMtzxWtH2XFRpMf7uCEQPJcj24RzAE4VYutrzEjhZy3oQcdx5Wbv3GNBCi4JCIR0CWUF698is2a9Et4nqQmw6lInOaXSWDDGJuKJAABnpIWXTqeMsXWNyimihE4F2na1kq1a5pvxrUS71styhTJ1tVGrPGraFWiLpN8AE8qJdu6MIBLxBpEzM40/R8tirzMqZeSpg4GH5m3wTn+jWn2p2scOKRSUb5UMOv4xIH4K3v1Ouvulw8pT537lGf9YaeAPig75o87gGh89FuzFBB45UkSIKHu1JxE4JPTE5fi3jmPOcV/wYxYThyyZJhz0C3XCR7vdrWhBoaCsadAu4VGSyE0QMAgzUrmw+R3NAda413mq1hEFoF9pvPeYkMRNNfNgG5uorT5MjY8eO+Ck32hpaxCchkBktbj1inR2BQGgITau2+JUPQkCwN2pDfdXJiZz0/X2+fCE8vaScvkBVYdyhwqg/q1SfuSfh+UX9M4HAICPeGjQegQ8Bl5P/YnTmU6O40iodikipKeIKKjDPeplUekJra5XP9d6bpljwYMK7HjsiAQurLLtN+1kZ7sC3SaFrm0ky7WE7A4w44GTk7gZXRMUg/FVo7qqr0h89GdO+Lo/Pg3HmERuYjR3FgIGQWtghFYikUPCCLCIT48y2ggADbbhYXr6KJSpL1TKiyM5/mUA7KXDytN+or+yJS5309KgLyKECh3cGL2Dnm4cdJLS+Zu9c8M5DgCAokR+TKjz/goXOaX+tB5K3XTvcY27F4wQ+vlQ8R4tyXpfN6mrIUheT5WbVhz10rBOj8MI35Av3m7mw5e4NbLKY0eNn1V7Far70jzTzGWVdEkm1cMoOy7RqiKgFS9hmsr5dkbASEiWcHIs7egtBAyCVWe2d2uANpW6It/BN/hozYkQJ1DdoVAm44Muui/UqlJvJbjTjYNOcuCqLd7zj4U4qurMhCQcNL9BpYyUOen+aOzxquDWKhsCADAnU7g4XBuZMmVTEw06pp+Cd6tGFeSz0/nztBwhelRwb2yma7WMaRAar8I8h720MpK+Vw0Sbop03hvzxdtjfVyst3ImQMciaZgVxS0DuyfBALze/JvjfnYsqqATFDpZvDsIAxU3yqzhuI8eDdZocgp3Bg8/zHjwgy5SukCH48AA/KRk7oxgr7tV5qwIsdPTip5SrVoq1TX4aW2pK/RF/FqNpSq1Rlltbla/dqlMc9KjQXBUAPWbNhqRvMslA8T5eqo9nmR6Cnf2xQOEKyOZMxQNfhZRjZSZ3Yhz9kcoA6pX5kTPPUd3WHiwpor6lZmxSkHe2fq/xLCupEs4s8CBgxYXOl0pd5Gy+ZvC33F0JsOEsgrsXHGw1w846V4PAV1FV7pjSwtZ3yLTlmjHOcmmZrIunET+lmbytUuJnfDbSp1KwQahWd+kro2kn5lH5hfHmt7KsyBN5+wIAE1Oxme+PMH8Lq+zhK4WjvloRDk/52XxFw0wwaBY29PTUARE0ekMhifgAjOGiHN2JiVzM6wC0i24iAEANoQ4shAw4n+UwWsug3o6UOki5Qu3eC844WdBd2TdMTuDnytyKOiWc2NTcKl2PTTL0LArhMPXi5a64fV+VlMao8gowhhb3aB+HouxDDrY1EzWelUWUbLg4ARu2KczrBtuzhd+lSJCOu4mPF/AIORb0fAHCqQn35lqWZ4s4aClHKLhkJuWR5LIZhew/YkS84vRPET7AioFxa3qq+pnF5DjkhxhfiTzWTBYfjVMuj+SvjwAwPomZY1MJEXkus9oPD9LuOSvFfIjqo4CRv2VShc5uGCL9/yjXhY0Ci0I6MJs4fJgLxLK6FcaHtJaWVWvfqa3aH13BAiTNzeTdeHaUQC6rlFdNSmFnxbtnKXt9JtII4QMuqc+wGq2tagbZqYL50TSP9WE0x4sMj95z0jpgQNO+s1hD610KawdI8ApIkobZuNGDk/Ao0MtjmLBMS873CKzpvQIEpTPzhDOe2cqWvFIaeC+na1kS7hkXASAeARiX4v4O+alR8Yng6Zwd4COO5/fjZIe2t9O9uxup5pysgAAbDzYF5eYXipJ4nUfWwJ86zyO+9nRUifZW5LUfbW6YQl41NhEPHlbK+3R0rE9zSE3KZ+/xTe3OoJw2lwLzp+SEvy+ozHA6ne305jtFr5qVFf5CfObOBRUR0sLVR5arvVo7utGsuqu4ez+SOpld2ZlvfIp9FPF5r4KYUDeqlZePSON/1E0l9h2AdunpOAZU1JgRizt0woFoFtayNfzsvGlkfSflMJPe28at7rKQyt2t5FtVW5a0SKzRsKAYATYxoM9RcRpA8xoYI4FD9rVSrb+cX/grhi/jagoc9F9ABB0IdodaRJOf3OKZdmLh+TFH5xQ3qrxs2PdhT1jAJwmQeZZafy5tw2V7hlp5yIONOABOi5clterHwdzHgJGwhW5wnXbWgOnrfOodJHy+Vu8ETkOAIArB/LXh7qcXl6vfBRpZnl3HPaw8ko3PVjo4EqiGWddo7pKq/T+PifZ3Rig9VlmLuKsYsYYW9VghOjGgxUN6ieVLlo23M6N6m1bomFlnfLZvGwhIucBAMBjxA1P4EYOT+BGhmv7VYO2BNieZGuLuoFQRrUGn5wkWcLJ9402PXL7MPHeox5adcTLDrXItMlLwGvhwJIs4pRcCxqca8F5iSJOitbO74z7tEZ5L1RZyrlZwsXZpvD1r/sj3x5Vza3Wf1QFAAAWHmzzQxSdooyxD44rb0Vu4akwALaqTon60lmrai4AgIeAS4+yb3fU+uiJfe10dzRjGHSPVwX3XysCi7QkdPZlVtSTj1wKjTqwRAuxiH6MNd+00R01fn15F51JEHBCYSJfckG2cMnVedLNtw6R7ro6T7r5gmzhp8WJ/NhYOA6ATs6j0s0Obmslm4I1TBJx0tV5wi2xmLQvUeki5Qs2R3TH8R2X5wjXpkkoM9jrVW5avr2Fbox0/GCsblCXRfOg8BMW2NKsLX/jJGvrtansBuPrJvJlwCh/Gjc+rlXf1loBsq/SprDWd44p/4z3PCpl5JCbHoz3PHpxE3DGerEZD75zHhRA/fdR+eVQjRcOEm7OkiBqMbW+QoWTHLxys/e8o77IHYeNA/ttQ6V7Qp0z/+uo/LIKEJH4WCj2tNNtjYHI4uIBAHa2ks1uAkEl+btjUzNZ51MjU3EFAFhep3wcaV+D8CgUlN/s8d1S7SG6IgX7Gs9VBh5vDcQuHL07XAprr/PTmnjOESl/Pyw/0+inDb1tRyi+d6a2ok795LCbBH2Qpkg49RfDpN/2xwqDXalyk8qFW70XaE0ADMYN+eIvcy04aHx5a4C2vHdc+Vc0cwRDpiCvaVA0CyV2RavgYWeOetmhw57IspnbFdq+pYV8HUlfA+3U+uHYDdt9lzb4acQLCy14VOr5tEZ5Px5j1/rh2F9KA7+L5xFcfYDWtSsQVwcVKQ0BqFlUFri/J44gKWPsuJfoOiZjAOx7zsNDwPX6UfnFUJ0W5Io3FDm4mIqh9TRVblK5YIv3/CNeFtFD8CSDLGjIzUPEX4dq8/Yx+dVmGeK2glhRTyIu4RrJZeG3Kruass27squVbm2VoSmSvgb62NtOt1+2yXNOuYuUxWP8Bj+tv3ar96LPa+PjPAAA3q1WXn3lsPwsYfF5gB7xsEqlD6cfvF2tvPLPI/ILlLG4RiYuq1U/vH+v/3Y9ffwEfKfc5r9Vrbx6wkuOB+tk5pHlgQLpSeHbkqP9jSo3qVyw2Tv3sIeVRzMOD8DfP1p6NCVEslSrTFv/XqU8E8084djQTL70qVT3MVK9j9Z9GxKom7WN6kpK9X+gV9crRuGnHqTMxfZeuN5zxutHAi9FopraHQpl6he1yscXrPdM/7qJxixvqTtUAPUvpYHfPF8pL5YJi/lD/qCLRiVSGm8oAP3TgcCvXjokPx1pzY2Q4zPG3q2WX//lLt/CA066x6fq+4yc4jzaFGh+sUp+MpS3m5bKn3l9vvjLSAzuTQ67yaH5m71zD3tZRbRjXZTDXzk3U7goVJt/H5Vf1pulrhenwto3N+s/Ctraoq6P9OJ6Zyvd7NSpSyUTJmstaWsQO1oVaPq/bwK3Xrjec8Z/jslvtMm0LZJxPCr1LK9VPpm/2Tv3hu2+SyKNTNSLTEFeVBq496bt3ssqXCSml9sHXSSixVNPolBQHjwQuOfWHb4rD7tJVCclnTnhJcfv3u2/6Vd7/Nf7CHiaA6xJb12YbvMS3jiivLxwkHDT8AQ+aLz4/40UH9zcrK7d00536DW8N/j2qGrukRg4jsFWNOJPo02LQ2n71PjI8RcPyU9GO5cWVtSrn8xI5cMWfOrMV01Ec35HV1wqa9/WQjaelYZ+rLVPmYvsq44iMOEkDABUCioCpuveLZTYHGFAFKJvZRdJ3YlTxqCg6p2XRjAvA2B72un2O3b5r04VIWNaKn/W1BRu5mg7V5RtxgMdAiSZMDILHOJVytQAZQGXAu21flpT6qR7Nzer6zY20S9r/PR4151jpHU09NRdpwB0eT35cH2TZ/WFA4Qr5ucK15c4uAkCF5m2lkyYXOoke3e3kW3dvc4AmN6/CwAAY/FJfKUA9LNa9b2vG9VVl+YICy/PFa4tsHMlepN1VcrUfe1k9/vHlTffPa78q0353xGyj4Knyk3Lv60eGxbCgAT9Ap6Twc17baLlw1CJKpUucnDees+MVkX/OXaKAGn3jJQeuHiAMD9RxIl6++vhu6OqGDgOCw+2d6dYVkxI5oNKr1PG2G/3BG59o1p+Kdr5tCBiEBN4SNTTx6VCWzgxxFBYOUgwcWDW2l5hKOBUolfRxQA4SYQU0Bm04VXB46PQba2IBB4S9cpgEwZqWxSXrQgAJQqQorcCXoCAX2+EXDA4BJyAQBQxSAIGAWPgKAVKGFL8hAVUCnK4KMGbBwu/frDQvETv3FNXu0ZEenTMA/DZFpw7NQXPHJPITRxiwyMyTTg7SUQpEgYJA2DCgAQo+NsV1tYU6FAOr3TTsv3t5Ju97XRni8IagiXtCggkuwAOvXa1q9AWrcKtFngM4iAzGjw1hZ9ZkojHD7XhERkmnO0QUNLJz7FMQW5TWEudn56odNGDu9vJtk1NZN0JPzsS7H3bOLBLHGhSrCAU1KBfQASAlo43vfuTAWLITM9V9cqy67f6LgmnIxMMhwDJlwwQ5l+TJ942PAGPxEhfVmU4qtykcv5m75xoL8cBOr5sT5aYXrk8V7w6VLv1jeqa+Vu850XzcDYw6A88MFpacutQKWTQSFcIZbRguTu1TWHdVq7UCwJAGAFGDBBCwHEIkApAgQJlCBhlQCPdZfcHvnv/ABhDR2VICkBYR93yuL33oA9qBsDu3+e/I1y4348yhDkPFUl/4zF0K6oYjnYFWl49ojw7+ytP8RWbvHM+q1E+0HtxE4wjblK1cIv3glg4DgSA7h4u/jmc42iXaft9e323G47D4HSno2Qq0l3D3KmydpfKYrJ7Auh4VhEGRAVQFQYBPwX/yV0TYUBOZ8cB0On9M1BkBn6ZgV9loMT7vYdc5TcGoPbeb3y/CCeRfFWueOO9I6SH9Vaj6gxhQNY1kRU3bPddMmutu/iZcv9jNV4aNOorHEfc5NBVW73nH/KwqC/ZEAC6ZbBw953DpHtDtSOU0UWlgfvL3SyqaoEGBv0BHoM4ys4V6e131EOrYnFnZNC7hD0i+qyOfPDKYfnZkINghG4dIt5970hpEa/z7Lg7jnhZxcNl8u/OWusuunOX9/ptLeomPaFqRzykasEW7wWVbhZ1jDuHgLttiPCb+0ebFoUTKvukRvnP60eVpdHOaWDQHxhmw6MGmPXr3ZU6aciqlQb9Ay33C/TRg4Hfb2hS1oZqxGGEbxsq3v1IofSMCYMlFsY5VWh755j66iUbvTN/usEz671j8htOhYbc7h50kQPzN3vnHPJE7zh4DOJvR0gP3TvK9HC4cq6lTrLv//YGbqNxkCExMOiLXDyAvzIS+fddbarmmhMGfRfNf/gcE859d5p59WAbNzRc21X1yrI7d/quaVagMTrzvg8CQNkmlHv5QOGaK3KF63KtXN7J15oDtOk/x5V/PV0eeLhNgeZo50rgIXFRkenZiwcIV4bbcTT6acMlG71n9UWFTgODeJAooKT1Z1vLUyWcqqcfZYydtcZdZBzt9n90rRoK7XjsW1MtX6RJOD1c20oXKf/FTt/CPToqW+nBwoOt2I7HpZm4jEY/bSh1kr3tamx0aobZ0OhnxppfH6OhwpZboe6rt3jnbWyha2Mxt4FBf+ChQumZGwdLuhOFD7lJxay1nkIjoKT/o3vLOTEJz/jXZMsnWnIzvCr1LTkoP7D0sPx0T8Q/RwsGwPNzxRv/MFp83CHisHHePpX5btvhm/9FvfphD5hnYNAnuGIgf/3iEvNLkVSUfL4ysOTBA4F74mGXQc+iO6diWytdf+M236VaZA4sPDb/ocD02AdTLWtLHHhiH1bjRUOtaNS/J5uXLR5jWqrFcXhU6rlzt/8aw3EY9CVMGCxzMrmLMyTIxkEUJKIY23znMPH+J4rNL0biOBTK1P8ci4/CtEHPE/HDfEISnvbaRMuHqSacpqW9n1D/29XKa89UyI/GW+9JD2kiZN48RLzr+nzxl1YeW7X0aZNp2x27/NesqFeN2hQGfYrhNlyweqZ1FwFGy5x037ZWsmFHC9m8r53sbpChxq0wj56gjm8z4ZNnpfNzbhsi/rookR8bqW2r65Uvrt7qu8AI0z09iGonMCoBFf99ouW9ITZumNY+rQHa8ma1/MqrR5TnjvvYUeilBJ4MCQYsGCTeeM0g8ZYMM87S2q/GR47ftsM3f0sLNepSGPQ5LhnAL3h+vOWNrj8nlJFmmTWd8NHqo15adcxDj9T42fF6P6t1KqzNTZiLUFA5DLydR4lpEkofYsMjShK58SWJ3IRUSdsiMRgKZcoVmzznbWimX0YzjkHfIepjpCwTyvnrWNNrZ6YJs/X0cyq0/Yta9eO3qpVXtreSTQqDoPXTYwUPwBcl4vFX5ArXXZAlXBpKTr07dreqO36+wze/yhudnLuBQbx4sEB6+uYh0p29bUdXPjwhv/OLnf4Fxq7j9CEmdxAWHmy/GS7++cbB0u0CRrpkSlTKSKWbln1Rp3y0ql79bF873emnkelkdQePQSywc0Wz0rg5c7P4S0bZuUK9NhLG6LvVyut/OhC4KxbifgYG8QAD4PenW76aksLP6G1bOlPno7Xz1numHfOxI71ti0HsiNkFNgbA52Rw8xYVm57NNnMR1TlXKVObAqxhewvZtK1V3bSvne6q8tDyRj+r01IDnEPAJQuQNsSGR4y2c8UTkrmpE5O4aRlmnC3qdBgnaQ7Q5gf2++9+/4T6hrFqMujLOARI/nqW7UC6CWf0ti0nCRAm37rDe8WyOvJBb9tiEFtiHv2UJkLmAwWmxRdpSK4LB2WMKhRUj8pc9QFW2xSgDa0ya5Ep+AOUBUSMJIkDycGjxBQJp2dKKDtBQHYegRCDudmqevWz+/f674i2zrmBQU9QaMfjVsy0bo8k6zseEMrow6X+e184pDxxuosT/hCJ24fszFTunAcKpCUj7VxhX/kwa4Exxg576KFHDgTu/bxOfd8om2rQX1iYK9zyxBjzi71tB0DHcfTig4EH/lohP2w4jtOTmMaBd2ZdE1l53jrvpCtyhet+MVT8zUALzuvrTqTOR2uXVgWeev2I8qKHgKu37TEw0MPYJG5Sb9sAAOBSqOsP+/x3vX1MfaW3bTGIHz3yME/gkeNnOfzV1+aJtw3tKPjUZ5wIY4wd9dIjbxxVXn7jqPxSLHSxDAx6Gh6B8NkMy+aSJH5cb9lAGWM7W8mWe7/x/2Kvk+7sLTsMeoYefYibMFjOTufPWzBIuGlqCnemhccxUd+NBD9h/u0t6qa3qpVXVtSTT1yqEUVl0H8xY7C+OcXy+cRkbhofRgE6Hhxxk6oXD8lL3j6mvOan2uuTG/RfemUHgAFwrgUNPi+Tv2hulnBxkYMbZ+aRptq50SATJh9wkr3L69SPPq1V/nvIzcoNCXWD0wUBgVTgwCVzM/mLZ6bzPx5u40bH83ulUKbsbiXb36yW//FZrfpfpwpt8ZrLoO/R68dHPACfYUIDpqZyZ05P4WeNS+Im51vxMJGLLLS2MwplarWXHt7dSrZuaCJrNzSra2r8rDpYAXgDg9MFAYOQIqKMYgcePyaRm1Do4MYOteER2WaUI3HYFMkXn1LGmmTWsKeN7FjfpH75ZYP6+WEPq1SZ8X36IdLrzqMrPALBwUPisAQ8elgCHpVn5YYMMKPcDAlnJokoxcqDzcIh27fNmZ8wn1sFd5vCmhsCrL7GR48d8dBD5S5yoNxFS9tUaDKchYFBR8KsGSNzhgRZWWaUk27CWSkiSksUUJKNRwkmDswc6jjyIgyIjzBPm8JaGv20/piPHa1y0/L6AKtVKASMCCqD/wcal2XP13IFSAAAAABJRU5ErkJggg==" alt="Wingtra" />
+    <p class="eyebrow">WingtraRAY Operator Training</p>
+    <h1>Day&nbsp;1 Knowledge Check</h1>
+    <p class="lede">20 questions on everything you covered today — hardware, maintenance, flight operations, payloads, field responsibilities, advanced planning, and WingtraGround. You have 15 minutes. Pick the best answer; you'll get a score and a short explanation for anything you miss.</p>
+
+    <label class="field" for="name">Your name</label>
+    <input type="text" id="name" placeholder="e.g. John Smith" autocomplete="name" />
+
+    <button class="btn btn-primary" id="startBtn" disabled>Start the check</button>
+
+    <p class="hint">Your answers stay on your phone. Only your name and final score are shared if you choose to send them.</p>
+
+    <div style="text-align:center; margin-top:18px">
+      <button class="linkish" id="showQrBtn">▦ Show QR code for the projector</button>
+    </div>
+  </section>
+
+  <!-- ───────────── QUIZ ───────────── -->
+  <section id="quiz" class="screen">
+    <div class="topbar">
+      <span class="qcount">Question <b id="qNow">1</b> of <span id="qTot">20</span></span>
+      <span class="timer" id="timer">15:00</span>
+    </div>
+    <div class="rail"><i id="railFill"></i></div>
+
+    <p class="eyebrow qsec" id="qSection">HARDWARE</p>
+    <p class="qtext" id="qText">—</p>
+    <div class="options" id="options"></div>
+
+    <button class="btn btn-primary" id="nextBtn" disabled>Next</button>
+  </section>
+
+  <!-- ───────────── RESULTS ───────────── -->
+  <section id="results" class="screen">
+    <div class="timeup" id="timeUpNote" style="display:none">⏱ Time's up — graded on the answers you completed.</div>
+    <div class="scorecard">
+      <div class="big"><span id="rScore">0</span><span>&nbsp;/&nbsp;20</span></div>
+      <div class="pct" id="rPct">0%</div>
+      <div class="verdict" id="rVerdict">—</div>
+      <div class="who" id="rWho"></div>
+    </div>
+
+    <div id="sendWrap" style="display:none">
+      <p class="sec-h">Reporting to your trainer</p>
+      <div class="send-card">
+        <p id="sendStatus" style="margin:0">Sending your score to your trainer…</p>
+        <button class="linkish" id="resendBtn" style="display:none; margin-top:8px">Didn’t open? Tap to send again</button>
+      </div>
+    </div>
+
+    <p class="sec-h">Review &amp; guidance</p>
+    <div class="review" id="reviewMissed"></div>
+    <button class="btn btn-ghost toggle-all" id="toggleAll">Show all 20 questions</button>
+    <div class="review" id="reviewAll" style="display:none; margin-top:12px"></div>
+
+    <p class="foot">WingtraRAY Operator Training · Day 1</p>
+  </section>
+</div>
+
+<!-- ───────────── QR OVERLAY ───────────── -->
+<div class="overlay" id="qrOverlay">
+  <div class="qr-card">
+    <h2>Scan to start</h2>
+    <p>Open your phone camera and point it here.</p>
+    <div id="qrbox"></div>
+    <div class="qr-url" id="qrUrl">—</div>
+    <button class="btn btn-primary" id="closeQr">Close</button>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   CONFIG
+   • RESULTS_ENDPOINT (recommended): your Google Apps Script web-app
+     URL, ending in /exec. When set, every score is logged silently
+     to your Google Sheet — no taps, no app-switching.
+   • TRAINER_WHATSAPP / TRAINER_EMAIL: fallback only, used if
+     RESULTS_ENDPOINT is blank. WhatsApp = full international number,
+     digits only (e.g. "85512345678"). Email = your address.
+   Leave all three blank → the app just shows the score on screen.
+   ════════════════════════════════════════════════════════════ */
+const RESULTS_ENDPOINT = "https://script.google.com/macros/s/AKfycbxaJ9XgY9AFN_hbzE_lyqSxXK4cFC-LaecZIr23WOfTq7YBcv1mAuwRQW-l_Qw69Ihg/exec";
+const TRAINER_WHATSAPP = "639177147024";
+const TRAINER_EMAIL    = "irwin.amago@wingtra.com";
+
+/* ── Questions ── */
+const QUESTIONS = [
+  { sec:"Hardware", topic:"Weight & payload",
+    q:"What are the WingtraRAY's maximum take-off weight and payload capacity?",
+    options:["5.2 kg take-off weight, 1,250 g payload","3.5 kg take-off weight, 800 g payload","7.0 kg take-off weight, 2,000 g payload","5.2 kg take-off weight, 2,750 g payload"],
+    correct:0,
+    guide:"Payload is 1,250 g — the 2.75 lb figure is pounds, not kilograms. Max take-off weight is 5.2 kg (11.5 lb)." },
+
+  { sec:"Hardware", topic:"Power components",
+    q:"A standard WingtraRAY flight is powered by:",
+    options:["Two 99 Wh smart batteries (a pair)","A single 99 Wh battery","Four 50 Wh batteries","One swappable fuel cell"],
+    correct:0,
+    guide:"It flies on a pair of 99 Wh Li-Po smart batteries. They charge together in about an hour, and the dock charges one pair at a time." },
+
+  { sec:"Maintenance", topic:"Charger lights",
+    q:"One battery pair shows blinking green; the other shows solid orange. What's happening?",
+    options:["The green pair is charging; the orange pair is waiting its turn","Both pairs are fully charged","The orange pair has a connection error","The charger has faulted"],
+    correct:0,
+    guide:"Blinking green = charging, solid orange = waiting (pairs charge one at a time), solid green = full, solid red = connection issue, all red = charger error." },
+
+  { sec:"Maintenance", topic:"Battery storage",
+    q:"How should batteries be kept for long-term storage?",
+    options:["20–60% charge, around 25 °C, dry","100% charge, kept cool","0% charge to prevent fire","80–100% charge, any temperature"],
+    correct:0,
+    guide:"Use Storage Mode (~50%): keep 20–60% charge, around 25 °C, dry, away from sun, flames, and metal, at 0–2,500 m." },
+
+  { sec:"Maintenance", topic:"Self-diagnosis scope",
+    q:"The in-flight self-diagnosis continuously monitors all of the following EXCEPT:",
+    options:["The transport case latches","Motors and propellers","GNSS and IMU","The camera and PPK module"],
+    correct:0,
+    guide:"Onboard self-diagnosis watches batteries, motors & props, servos, GNSS & IMU, camera & PPK, and telemetry — not physical accessories like the case." },
+
+  { sec:"Flight Operations", topic:"Manual landing safety",
+    q:"Why should you avoid using the down-arrow descent control to land?",
+    options:["It disables wind-gust detection and tipping prevention","It overrides the geobarrier","It cancels the parachute","It resets the home point"],
+    correct:0,
+    guide:"The down-arrow disables wind-gust detection and tipping prevention. Use the Land button (current spot) or the RTH icon (original take-off)." },
+
+  { sec:"Flight Operations", topic:"Repositioning controls",
+    q:"While repositioning to land, the right-side controls move the drone laterally. \"Forward\" means:",
+    options:["Toward the camera / your view","Into the wind","Toward the home point","Away from you"],
+    correct:0,
+    guide:"Right-side controls move the drone laterally — forward is toward the camera/your view. Left-side controls handle altitude and rotation. Pause holds for 2 minutes before auto-resuming." },
+
+  { sec:"Flight Operations", topic:"Connection-loss timeout",
+    q:"Telemetry drops mid-mission with the default 60-second timeout. What happens?",
+    options:["After 60 s it triggers Return to Home, and data capture continues throughout","It lands immediately where it is","It deletes the flight and returns","It pauses until the link returns"],
+    correct:0,
+    guide:"A lost link triggers RTH after the timeout (default 60 s), but data capture continues the whole time — the app just won't update live. Raise the timeout for BVLOS work." },
+
+  { sec:"Flight Operations", topic:"Minimum height clearance",
+    q:"When you set the minimum flight height for a mission, how much clearance above the tallest object should you plan to keep?",
+    options:["At least 30 m","10–20 m","1–2 m","50 m or more"],
+    correct:0,
+    guide:"Plan at least 30 m of clearance above the tallest object so the drone keeps safe margin through transition and along its line. 10–20 m is the tempting wrong answer — too tight." },
+
+  { sec:"Payloads", topic:"INSPECT detail",
+    q:"Which payload gives the finest detail (smallest GSD) for millimetre-level infrastructure inspection?",
+    options:["INSPECT — down to 0.25 cm/px","SURVEY61 — down to 0.5 cm/px","MAP61","SURVEY24 — 2.4 cm/px"],
+    correct:0,
+    guide:"INSPECT (61 MP with a tele lens) reaches 0.25 cm/px for millimetre-level detail on railways, airfields, and critical infrastructure." },
+
+  { sec:"Payloads", topic:"GCP-free survey",
+    q:"You need a large RGB survey with no ground control points possible. Which payload gives survey-grade accuracy from 120 m?",
+    options:["SURVEY61","RedEdge-P","LIDAR","INSPECT"],
+    correct:0,
+    guide:"SURVEY61 delivers survey-grade accuracy with no GCPs required from 120 m AGL, covering up to ~310 ha per flight." },
+
+  { sec:"Payloads", topic:"Terrain under vegetation",
+    q:"You need a bare-earth terrain model under thick scrub. Best payload?",
+    options:["LIDAR","MAP61","SURVEY24","RedEdge-P"],
+    correct:0,
+    guide:"LIDAR penetrates dense vegetation (up to 200 points/m²) for bare-earth terrain. RGB and multispectral sensors only capture the canopy top." },
+
+  { sec:"Operator Responsibilities", topic:"Wind go/no-go",
+    q:"Your anemometer, held above your head, reads 9 m/s. What's the correct call?",
+    options:["Do not fly — above 8 m/s measured means no flight","Fly, it's within the safe band","Fly as long as gusts stay under 12 m/s","Fly, but at reduced altitude"],
+    correct:0,
+    guide:"Measured above your head: 0–5 m/s tipping is rare, 5–8 m/s it can occur, and above 8 m/s (about 10 m/s at the surface) you do not fly." },
+
+  { sec:"Operator Responsibilities", topic:"High-altitude props",
+    q:"You're operating at 2,000 m above sea level with the LiDAR payload. Which propellers?",
+    options:["High-altitude — required above 1,500 m for heavy payloads","Standard — they're fine up to 2,500 m","Either set works at this altitude","High-altitude is only needed above 2,500 m"],
+    correct:0,
+    guide:"Standard props below 1,500 m AMSL. Above 1,500 m, high-altitude props are required for heavy payloads (LiDAR/INSPECT); above 2,500 m they're required for all payloads." },
+
+  { sec:"Operator Responsibilities", topic:"Telemetry pairing",
+    q:"Why must you match the telemetry module ID to the drone ID at setup?",
+    options:["The module and drone are a paired set and aren't interchangeable","To register the flight with the regulator","It sets the geobarrier size","It selects which payload is active"],
+    correct:0,
+    guide:"The telemetry module and drone are a paired set and aren't interchangeable — match their IDs during ground-station setup." },
+
+  { sec:"Operator Responsibilities", topic:"Post-mission batteries",
+    q:"After the mission, the correct battery practice is to:",
+    options:["Remove them and stow them separately, at storage charge","Leave them in the drone for a fast restart next time","Fully discharge them first","Keep them on the charger until the next flight"],
+    correct:0,
+    guide:"Never leave batteries in the drone. Remove and stow them separately at storage charge, and only power off after WingtraApp confirms the data is organized." },
+
+  { sec:"Advanced Flight Planning", topic:"LiDAR over vegetation",
+    q:"Planning a LiDAR mission over dense vegetation and complex terrain, you should:",
+    options:["Lower the height to ~70–80 m and raise side overlap to ~80%","Raise to 120 m and drop overlap to 30%","Keep the default 90 m / 30%","Turn terrain following off"],
+    correct:0,
+    guide:"Default is ~90 m height / 30% side overlap on flat, open ground. Dense vegetation and complex terrain need lower height (~70–80 m) and higher overlap (~80%), with terrain following ON." },
+
+  { sec:"Advanced Flight Planning", topic:"Windy landings",
+    q:"In gusty conditions on approach, the safest landing practice is to:",
+    options:["Let the drone land automatically, stepping in manually only to avoid a collision","Take full manual control and fly it down yourself","Increase the descent speed to punch through the gusts","Cancel the landing and circle until the wind stops completely"],
+    correct:0,
+    guide:"Windy landings should stay automated — the drone detects gusts and prevents tipping on its own. Only take manual control if you must reposition to avoid hitting something." },
+
+  { sec:"WingtraGround", topic:"Base logging duration",
+    q:"For survey-grade PPK, the base receiver must keep logging:",
+    options:["For the entire duration of all flights","Only during base setup","For the first flight only","One hour, then stop"],
+    correct:0,
+    guide:"The base must log for the entire duration of all flights, or the data can't be processed. Only Stop & Sync once every flight is done." },
+
+  { sec:"WingtraGround", topic:"Kit contents",
+    q:"The WingtraGround kit ships with two LoRa antennas. In this checkpoint workflow you:",
+    options:["Don't use them — they're not part of this workflow","Attach one per receiver for the base-rover link","Use them to connect to the drone","Need them to start logging"],
+    correct:0,
+    guide:"The kit includes two LoRa antennas, but they aren't used in this checkpoint workflow. The base sits on a known point while you measure 3–6 checkpoints by moving the single rover." },
+];
+
+/* ── State ── */
+let order = QUESTIONS.map((_,i)=>i);          // question order (fixed, by section)
+let prepared = [];                            // questions with shuffled options
+let idx = 0, selected = null, answers = [];   // answers[i] = chosen original-option index
+let userName = "";
+
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } return a; }
+
+function prepare(){
+  prepared = order.map(qi=>{
+    const Q = QUESTIONS[qi];
+    const optIdx = shuffle(Q.options.map((_,i)=>i));      // shuffled display order of options
+    return { qi, Q, optIdx };
+  });
+}
+
+const $ = id => document.getElementById(id);
+function show(screen){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); $(screen).classList.add('active'); window.scrollTo(0,0); }
+
+/* ── Start ── */
+$('name').addEventListener('input', e=>{ $('startBtn').disabled = e.target.value.trim().length === 0; });
+$('name').addEventListener('keydown', e=>{ if(e.key==='Enter' && e.target.value.trim()){ $('startBtn').click(); } });
+$('startBtn').addEventListener('click', ()=>{
+  userName = $('name').value.trim();
+  prepare(); idx=0; answers=[];
+  renderQ(); show('quiz'); startTimer();
+});
+
+/* ── 15-minute timer ── */
+let timeLeft = 900, timerId = null;
+function startTimer(){
+  timeLeft = 900; updateTimer();
+  timerId = setInterval(()=>{
+    timeLeft--; updateTimer();
+    if(timeLeft <= 0){ if(selected !== null) answers[idx] = selected; finish(true); }
+  }, 1000);
+}
+function updateTimer(){
+  const el = $('timer'); if(!el) return;
+  const m = Math.floor(timeLeft/60), s = timeLeft % 60;
+  el.textContent = m + ':' + String(s).padStart(2,'0');
+  el.classList.toggle('warn', timeLeft <= 120 && timeLeft > 30);
+  el.classList.toggle('crit', timeLeft <= 30);
+}
+function stopTimer(){ if(timerId){ clearInterval(timerId); timerId = null; } }
+
+/* ── Quiz ── */
+function renderQ(){
+  const {Q, optIdx} = prepared[idx];
+  $('qNow').textContent = idx+1;
+  $('qTot').textContent = prepared.length;
+  $('qSection').textContent = Q.sec.toUpperCase();
+  $('railFill').style.width = ((idx)/prepared.length*100) + '%';
+  $('qText').textContent = Q.q;
+  selected = null;
+  $('nextBtn').disabled = true;
+  $('nextBtn').textContent = (idx === prepared.length-1) ? 'See my results' : 'Next';
+
+  const keys = ['A','B','C','D'];
+  const wrap = $('options'); wrap.innerHTML = '';
+  optIdx.forEach((origI, displayI)=>{
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.innerHTML = `<span class="key">${keys[displayI]}</span><span>${Q.options[origI]}</span>`;
+    b.addEventListener('click', ()=>{
+      selected = origI;
+      [...wrap.children].forEach(c=>c.classList.remove('sel'));
+      b.classList.add('sel');
+      $('nextBtn').disabled = false;
+    });
+    wrap.appendChild(b);
+  });
+}
+$('nextBtn').addEventListener('click', ()=>{
+  if(selected===null) return;
+  answers[idx] = selected;
+  if(idx < prepared.length-1){ idx++; renderQ(); }
+  else finish();
+});
+
+/* ── Results ── */
+function finish(timedOut){
+  stopTimer();
+  $('timeUpNote').style.display = timedOut ? 'block' : 'none';
+  $('railFill').style.width = '100%';
+  let score = 0;
+  prepared.forEach((p,i)=>{ if(answers[i] === p.Q.correct) score++; });
+  const total = prepared.length;
+  const pct = Math.round(score/total*100);
+
+  $('rScore').textContent = score;
+  $('rPct').textContent = pct + '%';
+  $('rWho').textContent = userName ? userName : '';
+  $('rVerdict').textContent =
+      pct>=80 ? 'Field-ready — strong work.' :
+      pct>=60 ? 'Solid. Review the flagged items below.' :
+                'Worth another pass before you fly solo.';
+
+  // review lists
+  const missedWrap = $('reviewMissed'); const allWrap = $('reviewAll');
+  missedWrap.innerHTML = ''; allWrap.innerHTML = '';
+  const missedTopics = [];
+  prepared.forEach((p,i)=>{
+    const ok = answers[i] === p.Q.correct;
+    if(!ok) missedTopics.push(`Q${i+1} ${p.Q.topic}`);
+    const node = buildReview(p, i, ok);
+    allWrap.appendChild(node.cloneNode(true));
+    if(!ok) missedWrap.appendChild(node);
+  });
+  if(!missedWrap.children.length){
+    missedWrap.innerHTML = '<div class="rev ok"><div class="rq" style="margin:0">Full marks — nothing to review. Nice.</div></div>';
+  }
+
+  // ── reporting: auto-send the moment results appear ──
+  const msg =
+`WingtraRAY — Day 1 Knowledge Check
+Name: ${userName || '(no name)'}
+Score: ${score}/${total} (${pct}%)
+Missed: ${missedTopics.length ? missedTopics.join(', ') : 'none — full marks'}`;
+
+  const subject = 'Day 1 Knowledge Check — ' + (userName || 'Trainee');
+  const payload = { name:userName||'(no name)', score:score, total:total, pct:pct,
+                    missed: missedTopics.length ? missedTopics.join(', ') : 'none' };
+
+  if(RESULTS_ENDPOINT || TRAINER_WHATSAPP || TRAINER_EMAIL){
+    $('sendWrap').style.display = 'block';
+    $('sendStatus').textContent = 'Sending your score to your trainer…';
+    report(payload, subject, msg);
+    $('resendBtn').onclick = ()=> report(payload, subject, msg);
+  } else {
+    $('sendWrap').style.display = 'none';        // nothing configured → just show the score
+  }
+
+  show('results');
+}
+
+/* Fires every configured channel: silent Google Sheet log + email + WhatsApp. */
+function report(payload, subject, msg){
+  $('resendBtn').style.display = 'none';
+
+  // 1) Sheet log — dispatched first so it sends even if an app takes focus next.
+  let logged = Promise.resolve();
+  if(RESULTS_ENDPOINT){
+    logged = fetch(RESULTS_ENDPOINT, { method:'POST', mode:'no-cors', body: JSON.stringify(payload) });
+  }
+
+  // 2) Email composer.
+  if(TRAINER_EMAIL){
+    const a = document.createElement('a');
+    a.href = 'mailto:'+TRAINER_EMAIL+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(msg);
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  // 3) WhatsApp — opened last, since it's most likely to foreground the app.
+  if(TRAINER_WHATSAPP){
+    window.open('https://wa.me/'+TRAINER_WHATSAPP+'?text='+encodeURIComponent(msg), '_blank');
+  }
+
+  logged
+    .then(()=>{ $('sendStatus').textContent = 'Your score has been sent to your trainer ✓'; })
+    .catch(()=>{ $('sendStatus').textContent = 'Couldn’t reach the results server — tap to try again.'; })
+    .finally(()=>{ $('resendBtn').style.display = 'inline-flex'; });
+}
+
+function buildReview(p, i, ok){
+  const Q = p.Q;
+  const div = document.createElement('div');
+  div.className = 'rev ' + (ok?'ok':'no');
+  let html =
+    `<div class="reb"><span>Q${i+1} · ${Q.sec}</span><span class="tag ${ok?'ok':'no'}">${ok?'Correct':'Missed'}</span></div>`+
+    `<p class="rq">${Q.q}</p>`;
+  if(!ok){
+    html += `<div class="ans you-wrong"><span class="mk">Your answer:</span><span>${answers[i]!=null ? Q.options[answers[i]] : 'No answer'}</span></div>`;
+    html += `<div class="ans correct"><span class="mk">Correct:</span><span>${Q.options[Q.correct]}</span></div>`;
+  } else {
+    html += `<div class="ans correct"><span class="mk">✓</span><span>${Q.options[Q.correct]}</span></div>`;
+  }
+  html += `<p class="guide">${Q.guide}</p>`;
+  div.innerHTML = html;
+  return div;
+}
+
+$('toggleAll').addEventListener('click', ()=>{
+  const all = $('reviewAll');
+  const open = all.style.display !== 'none';
+  all.style.display = open ? 'none' : 'flex';
+  $('toggleAll').textContent = open ? 'Show all 20 questions' : 'Hide full review';
+});
+
+/* ── QR overlay (for the projector) ── */
+function openQR(){
+  const url = window.location.href.split('#')[0];
+  $('qrUrl').textContent = url;
+  const box = $('qrbox'); box.innerHTML = '';
+  if(window.QRCode){
+    new QRCode(box, { text:url, width:236, height:236, colorDark:'#1C2E36', colorLight:'#ffffff', correctLevel:QRCode.CorrectLevel.M });
+  } else {
+    box.innerHTML = '<p style="color:#1C2E36;font-size:13px;max-width:220px">QR library didn\'t load. Share this link instead:</p>';
+  }
+  $('qrOverlay').classList.add('active');
+}
+$('showQrBtn').addEventListener('click', openQR);
+$('closeQr').addEventListener('click', ()=> $('qrOverlay').classList.remove('active'));
+$('qrOverlay').addEventListener('click', e=>{ if(e.target===$('qrOverlay')) $('qrOverlay').classList.remove('active'); });
+</script>
+</body>
+</html>
