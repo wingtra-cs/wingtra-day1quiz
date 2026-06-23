@@ -142,7 +142,7 @@
     <p class="lede">20 questions on everything you covered today — hardware, maintenance, flight operations, payloads, field responsibilities, advanced planning, and WingtraGround. You have 15 minutes. Pick the best answer; you'll get a score and a short explanation for anything you miss.</p>
 
     <label class="field" for="name">Your name</label>
-    <input type="text" id="name" placeholder="e.g. John Smith" autocomplete="name" />
+    <input type="text" id="name" placeholder="e.g. John Smith." autocomplete="name" />
 
     <button class="btn btn-primary" id="startBtn" disabled>Start the check</button>
 
@@ -209,17 +209,14 @@
 <script>
 /* ════════════════════════════════════════════════════════════
    CONFIG
-   • RESULTS_ENDPOINT (recommended): your Google Apps Script web-app
-     URL, ending in /exec. When set, every score is logged silently
-     to your Google Sheet — no taps, no app-switching.
-   • TRAINER_WHATSAPP / TRAINER_EMAIL: fallback only, used if
-     RESULTS_ENDPOINT is blank. WhatsApp = full international number,
-     digits only (e.g. "85512345678"). Email = your address.
-   Leave all three blank → the app just shows the score on screen.
+   • RESULTS_ENDPOINT: your Google Apps Script web-app URL (ends in
+     /exec). Every result is logged silently to your Google Sheet.
+   • TRAINER_WHATSAPP: full international number, digits only
+     (e.g. "639177147024"). The result also opens in WhatsApp to you.
+   Leave both blank → the app just shows the score on screen.
    ════════════════════════════════════════════════════════════ */
 const RESULTS_ENDPOINT = "https://script.google.com/macros/s/AKfycbxaJ9XgY9AFN_hbzE_lyqSxXK4cFC-LaecZIr23WOfTq7YBcv1mAuwRQW-l_Qw69Ihg/exec";
 const TRAINER_WHATSAPP = "639177147024";
-const TRAINER_EMAIL    = "irwin.amago@wingtra.com";
 
 /* ── Questions ── */
 const QUESTIONS = [
@@ -458,21 +455,22 @@ function finish(timedOut){
   }
 
   // ── reporting: auto-send the moment results appear ──
+  const elapsed = fmtTime(Math.max(0, 900 - timeLeft));
   const msg =
 `WingtraRAY — Day 1 Knowledge Check
 Name: ${userName || '(no name)'}
 Score: ${score}/${total} (${pct}%)
+Time: ${elapsed}
 Missed: ${missedTopics.length ? missedTopics.join(', ') : 'none — full marks'}`;
 
-  const subject = 'Day 1 Knowledge Check — ' + (userName || 'Trainee');
   const payload = { name:userName||'(no name)', score:score, total:total, pct:pct,
-                    missed: missedTopics.length ? missedTopics.join(', ') : 'none' };
+                    time: elapsed, missed: missedTopics.length ? missedTopics.join(', ') : 'none' };
 
-  if(RESULTS_ENDPOINT || TRAINER_WHATSAPP || TRAINER_EMAIL){
+  if(RESULTS_ENDPOINT || TRAINER_WHATSAPP){
     $('sendWrap').style.display = 'block';
     $('sendStatus').textContent = 'Sending your score to your trainer…';
-    report(payload, subject, msg);
-    $('resendBtn').onclick = ()=> report(payload, subject, msg);
+    report(payload, msg);
+    $('resendBtn').onclick = ()=> report(payload, msg);
   } else {
     $('sendWrap').style.display = 'none';        // nothing configured → just show the score
   }
@@ -480,24 +478,21 @@ Missed: ${missedTopics.length ? missedTopics.join(', ') : 'none — full marks'}
   show('results');
 }
 
-/* Fires every configured channel: silent Google Sheet log + email + WhatsApp. */
-function report(payload, subject, msg){
+function fmtTime(sec){
+  const m = Math.floor(sec/60), s = sec % 60;
+  return m + ':' + String(s).padStart(2,'0');
+}
+
+/* Logs silently to the Google Sheet and opens the result in WhatsApp. */
+function report(payload, msg){
   $('resendBtn').style.display = 'none';
 
-  // 1) Sheet log — dispatched first so it sends even if an app takes focus next.
+  // Sheet log — dispatched first so it sends even if WhatsApp takes focus next.
   let logged = Promise.resolve();
   if(RESULTS_ENDPOINT){
     logged = fetch(RESULTS_ENDPOINT, { method:'POST', mode:'no-cors', body: JSON.stringify(payload) });
   }
 
-  // 2) Email composer.
-  if(TRAINER_EMAIL){
-    const a = document.createElement('a');
-    a.href = 'mailto:'+TRAINER_EMAIL+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(msg);
-    document.body.appendChild(a); a.click(); a.remove();
-  }
-
-  // 3) WhatsApp — opened last, since it's most likely to foreground the app.
   if(TRAINER_WHATSAPP){
     window.open('https://wa.me/'+TRAINER_WHATSAPP+'?text='+encodeURIComponent(msg), '_blank');
   }
